@@ -6,8 +6,8 @@ package peer;
  * Representa una entrada de la tabla de encaminamiento
  */
 public class EntradaTEncam {
-    private String host, puerto;
-    private byte[] idPeer;
+    private final String host, puerto;
+    private final byte[] idPeer;
 
     
     /**
@@ -43,4 +43,10 @@ public class EntradaTEncam {
         return puerto;
     }
     
+    /**
+     * @return URL base
+     */
+    public String getURLBase() {
+        return "http://" + host + ":" + puerto + "/DHT/webresources/generic/";
+    }
 }

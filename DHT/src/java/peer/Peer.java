@@ -11,8 +11,8 @@ import java.util.HashMap;
  */
 public class Peer {
     
-    private final int BITS_CLAVE = 160; // Permite tener máximo 2^160 peers
-    private final int K = 3; // Tamaño de los k-bucket
+    static private final int BITS_CLAVE = 160; // Permite tener máximo 2^160 peers
+    static private final int K = 3; // Tamaño de los k-bucket
     
     // Identificador del Peer
     private final byte[] idPeer; // Tendrá que ser de 160 / 8 = 20 posiciones
@@ -59,75 +59,18 @@ public class Peer {
      * @param value 
      */
     public void put(byte[] key, String value) {
-        // Mantiene su porción correspondiente de la DHT mediante un HashMap<byte[], String>
-        
-        
-        // Mantiene su tabla de encaminamiento con los nodos que conoce
-        
-        
-    }
-    
-    
-    
-    /**
-     * El objetivo es encontrar los k nodos más cercanos a un recurso.
-     * @param key del recurso
-     */
-    public void buscarNodos(byte[] key) {
-        EntradaTEncam[] nodosRespuesta = null, nodosAnteriores;
-        do {
-            nodosAnteriores = nodosRespuesta;
-            nodosRespuesta = new EntradaTEncam[K*K];
-            // preguntamos a los nodos más cercanos a la clave
-            EntradaTEncam[] nodosPregunta = getNodosMasCercanos(key, K);
-            for (EntradaTEncam nodo : nodosPregunta) {
-                // preguntar
-                // (llamada web service, hacer K threads?)
-                // Cada nodo devuelve los k nodos más cercanos a la clave
-                // (guardarlos en nodosRespuesta)
-            }
-            // Seleccionar de entre todos los nodos devueltos los más cercanos a la clave
-            
-        } while (sonNodosMasCercanos(nodosAnteriores, nodosRespuesta));
-        
-    }
-    
-    
-    
-    /**
-     * Devuelve los n nodos más cercanos a la key
-     * @param key
-     * @param num 
-     */
-    private EntradaTEncam[] getNodosMasCercanos(byte[] key, int n) {
-        EntradaTEncam[] nodos = new EntradaTEncam[n];
-        
-        // buscamos en la tabla de encaminamiento
-        
-        return nodos;
-    }
-    
-    
-    
-    /**
-     * 
-     * @return 
-     */
-    private boolean sonNodosMasCercanos(EntradaTEncam[] anteriores, EntradaTEncam[] actuales) {
-        if (anteriores == null) {
-            return true;
-        }
-        return true;
+        tabla.put(new String(key), value);
     }
     
     
     
     /**
      * Retorna el valor asociado a key
-     * @param key 
+     * @param key
+     * @return 
      */
-    public void get(byte[] key) {
-        
+    public String get(byte[] key) {
+        return tabla.get(key.toString());
     }
     
     
@@ -172,18 +115,18 @@ public class Peer {
      * @param key
      * @return 
      */
-    public byte[] getNode(byte[] key) {
+    public EntradaTEncam getNode(byte[] key) {
         byte[] distancia = distance(idPeer, key);
         int kBucket = getPos1MasSignificativo(distancia); // filaTabla = k-bucket
         if (kBucket == -1) {
-            return idPeer;
+            return new EntradaTEncam(idPeer, "localhost", "8080");
         } else {
             if (tablaEncaminamiento[kBucket][0] != null) {
                 return buscarIdMasProxima(kBucket, key); // Buscamos en el k-bucket la id más próxima
             }
             for (int i = kBucket - 1; i >= 0; i--) { // Buscamos k-bucket no vacía más similar
                 if (bitACero(distancia, i)) {
-                    return idPeer;
+                    return new EntradaTEncam(idPeer, "localhost", "8080");
                 }
                 if (tablaEncaminamiento[i][0] != null) {
                     return buscarIdMasProxima(i, key);
@@ -195,14 +138,29 @@ public class Peer {
     
     
     
-    public byte[] buscarIdMasProxima(int kBucket, byte [] key) {
-        /*
-        byte [] resultado = tablaEncaminamiento[kBucket][0];
+    private EntradaTEncam buscarIdMasProxima(int kBucket, byte [] key) {
+        EntradaTEncam resultado = tablaEncaminamiento[kBucket][0];
         for (int i = 1; i < K; i++) {
-            if (esPrimeroEsMajor(tablaEncaminamiento[kBucket][0], key))
+            if (elPrimeroEsMenor(tablaEncaminamiento[kBucket][i], resultado, key)) {
+                resultado = tablaEncaminamiento[kBucket][i];
+            }
         }
-        */
         return null;
+    }
+    
+    
+    
+    private boolean elPrimeroEsMenor(EntradaTEncam primero, EntradaTEncam segundo, byte [] key) {
+        if (primero == null) {
+            return false;
+        }
+        int i = 0;
+        byte[] d1 = distance(primero.getIdPeer(), key);
+        byte[] d2 = distance(segundo.getIdPeer(), key);
+        while (d1[i] == d2[i]) {
+            i++;
+        }
+        return d1[i] < d2[i];
     }
     
     
@@ -238,6 +196,12 @@ public class Peer {
             }
         }
         return -1; // Clave con todos los bits a 0
+    }
+    
+    
+    
+    public String getIdPeer() {
+        return new String(idPeer);
     }
     
     
