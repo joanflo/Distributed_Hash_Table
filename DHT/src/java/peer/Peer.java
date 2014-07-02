@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 
 package peer;
 
@@ -12,26 +8,30 @@ import java.util.HashMap;
 
 /**
  *
- * @author Carlos
  */
 public class Peer {
+    
     private final int BITS_CLAVE = 160; // Permite tener máximo 2^160 peers
     private final int K = 3; // Tamaño de los k-bucket
     
     // Identificador del Peer
-    private final byte[] idPeer; // Tendra que ser de 160 / 8 = 20 posiciones
-            
+    private final byte[] idPeer; // Tendrá que ser de 160 / 8 = 20 posiciones
+    
     /* El HashMap tendrá como clave una cadena de 20 bytes (160 bits) y como 
      * valor un String con una URL simulando la localización del fichero */
     HashMap<String, String> tabla;
     
     private EntradaTEncam[][] tablaEncaminamiento;
-            
+    
+    
+    
     public Peer(byte[] idPeer) {
         this.idPeer = idPeer;
         tabla = new HashMap<>();
         tablaEncaminamiento = new EntradaTEncam[BITS_CLAVE][K];
     }
+    
+    
     
     // Registra a un peer en su tabla de encaminamiento
     public void addPeer(EntradaTEncam entradaPeer) {
@@ -48,6 +48,40 @@ public class Peer {
         }
     }
     
+    
+    
+    /**
+     * Almacena un par <key,value> en el nodo más cercano a key
+     * @param key
+     * @param value 
+     */
+    public void put(byte[] key, String value) {
+        // Mantiene su porción correspondiente de la DHT mediante un HashMap<byte[], String>
+        
+        
+        // Mantiene su tabla de encaminamiento con los nodos que conoce
+        
+        
+    }
+    
+    
+    
+    /**
+     * Retorna el valor asociado a key
+     * @param key 
+     */
+    public void get(byte[] key) {
+        
+    }
+    
+    
+    
+    /**
+     * Determina la distancia XOR entre dos claves de 160 bits (20 bytes)
+     * @param key
+     * @param guid
+     * @return 
+     */
     public byte[] distance(byte[] key, byte[] guid) {
         byte[] resultado = new byte[BITS_CLAVE / 8];
         for (int i = 0; i < BITS_CLAVE / 8; i++) {
@@ -56,6 +90,14 @@ public class Peer {
         return resultado;
     }
     
+    
+    
+    /**
+     * Dada una cadena de caracteres, obtiene una clave de 160 bits,
+     * correspondiente a su cifrado mediante SHA1
+     * @param value
+     * @return 
+     */
     public byte[] sha1(String value) {
         MessageDigest md = null;
         try {
@@ -67,6 +109,13 @@ public class Peer {
         return md.digest(value.getBytes());
     }
     
+    
+    
+    /**
+     * Obtiene el guid del nodo más cercano a la clave
+     * @param key
+     * @return 
+     */
     public byte[] getNode(byte[] key) {
         byte[] distancia = distance(idPeer, key);
         int kBucket = getPos1MasSignificativo(distancia); // filaTabla = k-bucket
@@ -85,14 +134,22 @@ public class Peer {
                 }
             }
         }
+        return null;
     }
     
-    public byte[] buscarIdMasProxima(int kBucket, byte []] key) {
+    
+    
+    public byte[] buscarIdMasProxima(int kBucket, byte [] key) {
+        /*
         byte [] resultado = tablaEncaminamiento[kBucket][0];
         for (int i = 1; i < K; i++) {
             if (esPrimeroEsMajor(tablaEncaminamiento[kBucket][0], key))
         }
+        */
+        return null;
     }
+    
+    
     
     private boolean bitACero (byte [] key, int posicion) {
         byte b = key[posicion / 8];
@@ -102,7 +159,13 @@ public class Peer {
         return b % 2 == 0;
     }
     
-    // Obtiene la posición del bit más significativo de la clave b
+    
+    
+    /**
+     * Obtiene la posición del bit más significativo de la clave b
+     * @param key
+     * @return 
+     */
     public int getPos1MasSignificativo(byte[] key) {
         byte [] b = key.clone();
         for (int i = 0; i < BITS_CLAVE / 8; i++) {
@@ -120,4 +183,6 @@ public class Peer {
         }
         return -1; // Clave con todos los bits a 0
     }
+    
+    
 }
