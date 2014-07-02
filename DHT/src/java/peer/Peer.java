@@ -19,7 +19,7 @@ public class Peer {
     
     /* El HashMap tendrá como clave una cadena de 20 bytes (160 bits) y como 
      * valor un String con una URL simulando la localización del fichero */
-    HashMap<String, String> tabla;
+    private HashMap<String, String> tabla;
     
     private EntradaTEncam[][] tablaEncaminamiento;
     
@@ -33,7 +33,10 @@ public class Peer {
     
     
     
-    // Registra a un peer en su tabla de encaminamiento
+    /**
+     * Registra a un peer en su tabla de encaminamiento
+     * @param entradaPeer 
+     */
     public void addPeer(EntradaTEncam entradaPeer) {
         byte[] distancia = distance(idPeer, entradaPeer.getIdPeer());
         int kBucket = getPos1MasSignificativo(distancia); // kBucket = fila de la tabla
@@ -62,6 +65,59 @@ public class Peer {
         // Mantiene su tabla de encaminamiento con los nodos que conoce
         
         
+    }
+    
+    
+    
+    /**
+     * El objetivo es encontrar los k nodos más cercanos a un recurso.
+     * @param key del recurso
+     */
+    public void buscarNodos(byte[] key) {
+        EntradaTEncam[] nodosRespuesta = null, nodosAnteriores;
+        do {
+            nodosAnteriores = nodosRespuesta;
+            nodosRespuesta = new EntradaTEncam[K*K];
+            // preguntamos a los nodos más cercanos a la clave
+            EntradaTEncam[] nodosPregunta = getNodosMasCercanos(key, K);
+            for (EntradaTEncam nodo : nodosPregunta) {
+                // preguntar
+                // (llamada web service, hacer K threads?)
+                // Cada nodo devuelve los k nodos más cercanos a la clave
+                // (guardarlos en nodosRespuesta)
+            }
+            // Seleccionar de entre todos los nodos devueltos los más cercanos a la clave
+            
+        } while (sonNodosMasCercanos(nodosAnteriores, nodosRespuesta));
+        
+    }
+    
+    
+    
+    /**
+     * Devuelve los n nodos más cercanos a la key
+     * @param key
+     * @param num 
+     */
+    private EntradaTEncam[] getNodosMasCercanos(byte[] key, int n) {
+        EntradaTEncam[] nodos = new EntradaTEncam[n];
+        
+        // buscamos en la tabla de encaminamiento
+        
+        return nodos;
+    }
+    
+    
+    
+    /**
+     * 
+     * @return 
+     */
+    private boolean sonNodosMasCercanos(EntradaTEncam[] anteriores, EntradaTEncam[] actuales) {
+        if (anteriores == null) {
+            return true;
+        }
+        return true;
     }
     
     
