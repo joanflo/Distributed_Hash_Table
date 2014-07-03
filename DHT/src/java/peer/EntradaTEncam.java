@@ -2,6 +2,8 @@
 
 package peer;
 
+import webservice.Service;
+
 /**
  * Representa una entrada de la tabla de encaminamiento
  */
@@ -47,6 +49,9 @@ public class EntradaTEncam {
      * @return URL base
      */
     public String getURLBase() {
-        return "http://" + host + ":" + puerto + "/DHT/webresources/generic/";
+        if (host.equals(Service.HOSTS[Service.MI_IP])) {
+            return "http://localhost:" + puerto + "/DHT/webresources/";
+        }
+        return "http://" + host + ":" + puerto + "/DHT/webresources/";
     }
 }

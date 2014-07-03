@@ -5,6 +5,7 @@ package peer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import webservice.Service;
 
 /**
  *
@@ -42,7 +43,7 @@ public class Peer {
         int kBucket = getPos1MasSignificativo(distancia); // kBucket = fila de la tabla
         if (kBucket != -1) { // Es él mismo
             int posicion = 0;
-            while (tablaEncaminamiento[kBucket][posicion] != null && posicion < K) {
+            while (posicion < K && tablaEncaminamiento[kBucket][posicion] != null) {
                 posicion++;
             }
             if (posicion != K) { // Si no se ha llenado su k-bucket
@@ -70,7 +71,7 @@ public class Peer {
      * @return 
      */
     public String get(byte[] key) {
-        return tabla.get(key.toString());
+        return tabla.get(new String(key));
     }
     
     
@@ -104,7 +105,6 @@ public class Peer {
         } catch(NoSuchAlgorithmException e) {
             e.printStackTrace();
         } 
-        System.out.println(md.digest(value.getBytes()).length);
         return md.digest(value.getBytes());
     }
     
@@ -119,21 +119,26 @@ public class Peer {
         byte[] distancia = distance(idPeer, key);
         int kBucket = getPos1MasSignificativo(distancia); // filaTabla = k-bucket
         if (kBucket == -1) {
-            return new EntradaTEncam(idPeer, "localhost", "8080");
+            return new EntradaTEncam(idPeer, Service.HOSTS[Service.MI_IP], "8080");
         } else {
             if (tablaEncaminamiento[kBucket][0] != null) {
                 return buscarIdMasProxima(kBucket, key); // Buscamos en el k-bucket la id más próxima
             }
-            for (int i = kBucket - 1; i >= 0; i--) { // Buscamos k-bucket no vacía más similar
-                if (bitACero(distancia, i)) {
-                    return new EntradaTEncam(idPeer, "localhost", "8080");
-                }
-                if (tablaEncaminamiento[i][0] != null) {
-                    return buscarIdMasProxima(i, key);
+            for (int i = kBucket + 1; i < BITS_CLAVE; i++) { // Buscamos k-bucket no vacía más similar
+                if (!bitACero(distancia, i)) {
+                    if (i > 156) {
+                        System.out.println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii: " +  i);
+                        Main.printBytes(idPeer);
+                        Main.printBytes(distancia);
+                        System.out.println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+                    }
+                    if (tablaEncaminamiento[i][0] != null) {
+                        return buscarIdMasProxima(i, key);
+                    }
                 }
             }
+            return new EntradaTEncam(idPeer, Service.HOSTS[Service.MI_IP], "8080");
         }
-        return null;
     }
     
     
@@ -145,7 +150,7 @@ public class Peer {
                 resultado = tablaEncaminamiento[kBucket][i];
             }
         }
-        return null;
+        return resultado;
     }
     
     
@@ -166,8 +171,11 @@ public class Peer {
     
     
     private boolean bitACero (byte [] key, int posicion) {
-        byte b = key[posicion / 8];
-        for (int i =  0; i < posicion % 8; i++) {
+        int b = key[posicion / 8];
+        if (b < 0) {
+            b = 256 + b;
+        }
+        for (int i =  0; i < 7-(posicion % 8); i++) {
             b = (byte) (b / 2);
         }
         return b % 2 == 0;
